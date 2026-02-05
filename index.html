@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therefore Datagrid Reorder Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #0078d4;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        
+        .file-input-label:hover {
+            background: #106ebe;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .eforms-list {
+            margin-top: 20px;
+        }
+        
+        .eform-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .eform-header {
+            background: #0078d4;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .datagrid-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .datagrid-section:last-child {
+            border-bottom: none;
+        }
+        
+        .datagrid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .datagrid-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .datagrid-key {
+            font-size: 12px;
+            color: #888;
+            font-family: monospace;
+        }
+        
+        .datagrid-mockup {
+            background: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .datagrid-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .datagrid-table th {
+            background: #f0f0f0;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            white-space: nowrap;
+        }
+        
+        .datagrid-column {
+            cursor: move;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .datagrid-column:hover {
+            background: #e3f2fd;
+        }
+        
+        .datagrid-column.sortable-ghost {
+            opacity: 0.4;
+            background: #bbdefb;
+        }
+        
+        .datagrid-column.sortable-drag {
+            opacity: 1;
+            background: #90caf9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .column-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .column-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .column-type {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        
+        .column-key {
+            font-size: 11px;
+            color: #aaa;
+            font-family: monospace;
+        }
+        
+        .drag-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        
+        .drag-hint svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .save-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            margin: 0 10px;
+        }
+        
+        .btn-primary {
+            background: #107c10;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0e700e;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .no-datagrids {
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .sample-data-row td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .status-message {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .status-message.success {
+            display: block;
+            background: #dff6dd;
+            color: #107c10;
+            border: 1px solid #107c10;
+        }
+        
+        .status-message.error {
+            display: block;
+            background: #fde7e9;
+            color: #a80000;
+            border: 1px solid #a80000;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            cursor: pointer;
+        }
+        
+        .drop-zone:hover {
+            border-color: #0078d4;
+            background: #f0f7fc;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #0078d4;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        
+        .drop-zone-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .drop-zone-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .drop-zone-hint {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .or-divider {
+            margin: 20px 0;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Therefore Datagrid Reorder Tool</h1>
+        <p class="subtitle">Upload an XML configuration file to reorder datagrid columns in your Therefore eForms</p>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="upload-section">
+            <div id="dropZone" class="drop-zone">
+                <div class="drop-zone-icon">📄</div>
+                <div class="drop-zone-text">Drag and drop your XML file here</div>
+                <div class="drop-zone-hint">or click to browse</div>
+                <input type="file" id="xmlFile" accept=".xml" style="display: none;">
+            </div>
+            <div class="or-divider">— or —</div>
+            <div class="file-input-wrapper">
+                <input type="file" id="xmlFileBtn" accept=".xml" onchange="handleFileSelect(event)">
+                <label for="xmlFileBtn" class="file-input-label">📁 Choose XML File</label>
+            </div>
+            <div id="fileName" class="file-name"></div>
+        </div>
+        
+        <div id="eformsContainer" class="eforms-list"></div>
+        
+        <div id="saveSection" class="save-section hidden">
+            <button class="btn btn-primary" onclick="saveXml()">💾 Save Modified XML</button>
+            <button class="btn btn-secondary" onclick="resetForm()">🔄 Load Another File</button>
+        </div>
+    </div>
+
+    <script>
+        let originalXml = null;
+        let eFormsData = [];
+        let datagridComponents = [];
+        let sortableInstances = [];
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            processFile(file);
+        }
+        
+        function processFile(file) {
+            document.getElementById('fileName').textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    originalXml = e.target.result;
+                    parseXml(originalXml);
+                    showStatus('File loaded successfully!', 'success');
+                } catch (err) {
+                    showStatus('Error parsing XML: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Drag and drop functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('xmlFile');
+        
+        // Click on drop zone triggers file input
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+        
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Highlight drop zone when dragging over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropZone.classList.add('drag-over');
+        }
+        
+        function unhighlight() {
+            dropZone.classList.remove('drag-over');
+        }
+        
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const file = files[0];
+                // Check if it's an XML file
+                if (file.name.toLowerCase().endsWith('.xml') || file.type === 'text/xml' || file.type === 'application/xml') {
+                    processFile(file);
+                } else {
+                    showStatus('Please drop an XML file (.xml)', 'error');
+                }
+            }
+        }
+
+        function parseXml(xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+            
+            // Check for parsing errors
+            if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                throw new Error('Invalid XML file');
+            }
+            
+            // Find all EForm elements
+            const eForms = xmlDoc.getElementsByTagName('EForm');
+            eFormsData = [];
+            datagridComponents = [];
+            
+            for (let i = 0; i < eForms.length; i++) {
+                const eForm = eForms[i];
+                const fName = getElementText(eForm, 'FName') || `EForm ${i + 1}`;
+                const fDef = getElementText(eForm, 'FDef');
+                
+                if (!fDef) continue;
+                
+                try {
+                    const formConfig = JSON.parse(fDef);
+                    const datagrids = findDatagrids(formConfig);
+                    
+                    if (datagrids.length > 0) {
+                        eFormsData.push({
+                            index: i,
+                            name: fName,
+                            formConfig: formConfig,
+                            originalFDef: fDef,
+                            datagrids: datagrids
+                        });
+                        
+                        datagrids.forEach((dg, dgIndex) => {
+                            datagridComponents.push({
+                                eFormIndex: i,
+                                datagridIndex: dgIndex,
+                                datagrid: dg
+                            });
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing FDef JSON for', fName, e);
+                }
+            }
+            
+            renderEForms();
+        }
+
+        function getElementText(parent, tagName) {
+            const element = parent.getElementsByTagName(tagName)[0];
+            return element ? element.textContent : null;
+        }
+
+        function findDatagrids(obj, path = '', parent = null, key = null) {
+            const datagrids = [];
+            
+            if (typeof obj !== 'object' || obj === null) {
+                return datagrids;
+            }
+            
+            // Check if this is a datagrid
+            if (obj.type === 'datagrid' && Array.isArray(obj.components)) {
+                datagrids.push({
+                    path: path,
+                    parent: parent,
+                    key: key,
+                    config: obj,
+                    label: obj.label || 'Unnamed Datagrid',
+                    keyName: obj.key || 'unknown',
+                    components: obj.components
+                });
+            }
+            
+            // Recursively search in components array
+            if (Array.isArray(obj.components)) {
+                obj.components.forEach((comp, idx) => {
+                    datagrids.push(...findDatagrids(comp, `${path}.components[${idx}]`, obj.components, idx));
+                });
+            }
+            
+            // Recursively search in other properties
+            for (const prop in obj) {
+                if (prop !== 'components' && typeof obj[prop] === 'object' && obj[prop] !== null) {
+                    datagrids.push(...findDatagrids(obj[prop], `${path}.${prop}`, obj, prop));
+                }
+            }
+            
+            return datagrids;
+        }
+
+        function renderEForms() {
+            const container = document.getElementById('eformsContainer');
+            container.innerHTML = '';
+            
+            if (eFormsData.length === 0) {
+                container.innerHTML = '<div class="eform-card"><div class="no-datagrids">No eForms with datagrids found in this file.</div></div>';
+                return;
+            }
+            
+            eFormsData.forEach((eForm, eFormIdx) => {
+                const card = document.createElement('div');
+                card.className = 'eform-card';
+                
+                let datagridsHtml = '';
+                eForm.datagrids.forEach((dg, dgIdx) => {
+                    const globalIdx = getGlobalDatagridIndex(eFormIdx, dgIdx);
+                    datagridsHtml += renderDatagrid(dg, globalIdx);
+                });
+                
+                card.innerHTML = `
+                    <div class="eform-header">${escapeHtml(eForm.name)}</div>
+                    ${datagridsHtml}
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Initialize Sortable for each datagrid
+            sortableInstances.forEach(s => s.destroy());
+            sortableInstances = [];
+            
+            datagridComponents.forEach((dc, idx) => {
+                const el = document.getElementById(`datagrid-${idx}`);
+                if (el) {
+                    const sortable = Sortable.create(el, {
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: function(evt) {
+                            // Update the component order
+                            const itemEl = evt.item;
+                            const newIndex = evt.newIndex;
+                            const oldIndex = evt.oldIndex;
+                            
+                            // Reorder the components array
+                            const components = dc.datagrid.components;
+                            const [movedItem] = components.splice(oldIndex, 1);
+                            components.splice(newIndex, 0, movedItem);
+                        }
+                    });
+                    sortableInstances.push(sortable);
+                }
+            });
+            
+            document.getElementById('saveSection').classList.remove('hidden');
+        }
+
+        function getGlobalDatagridIndex(eFormIdx, datagridIdx) {
+            let count = 0;
+            for (let i = 0; i < eFormsData.length; i++) {
+                if (i === eFormIdx) {
+                    for (let j = 0; j < eFormsData[i].datagrids.length; j++) {
+                        if (j === datagridIdx) return count;
+                        count++;
+                    }
+                } else {
+                    count += eFormsData[i].datagrids.length;
+                }
+            }
+            return -1;
+        }
+
+        function renderDatagrid(datagrid, idx) {
+            const columns = datagrid.components.map((comp, colIdx) => {
+                const label = comp.label || comp.key || `Column ${colIdx + 1}`;
+                const type = comp.type || 'unknown';
+                const key = comp.key || '';
+                
+                return `
+                    <th class="datagrid-column" data-index="${colIdx}">
+                        <div class="column-info">
+                            <span class="column-label">${escapeHtml(label)}</span>
+                            <span class="column-type">${escapeHtml(type)}</span>
+                            ${key ? `<span class="column-key">${escapeHtml(key)}</span>` : ''}
+                        </div>
+                    </th>
+                `;
+            }).join('');
+            
+            // Create sample data cells
+            const sampleCells = datagrid.components.map(() => 
+                `<td>Sample data...</td>`
+            ).join('');
+            
+            return `
+                <div class="datagrid-section">
+                    <div class="datagrid-header">
+                        <div>
+                            <div class="datagrid-title">${escapeHtml(datagrid.label)}</div>
+                            <div class="datagrid-key">Key: ${escapeHtml(datagrid.keyName)}</div>
+                        </div>
+                    </div>
+                    <div class="drag-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                        Drag and drop columns to reorder them
+                    </div>
+                    <div class="datagrid-mockup">
+                        <table class="datagrid-table">
+                            <thead>
+                                <tr id="datagrid-${idx}">
+                                    ${columns}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="sample-data-row">
+                                    ${sampleCells}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return String(text || '');
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function saveXml() {
+            if (!originalXml || eFormsData.length === 0) return;
+            
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(originalXml, 'text/xml');
+                const eForms = xmlDoc.getElementsByTagName('EForm');
+                
+                // Update each eForm's FDef with the modified JSON
+                eFormsData.forEach(eForm => {
+                    const eFormElement = eForms[eForm.index];
+                    const fDefElement = eFormElement.getElementsByTagName('FDef')[0];
+                    
+                    if (fDefElement) {
+                        // Pretty print the JSON to match original format
+                        const newJson = JSON.stringify(eForm.formConfig, null, 2);
+                        fDefElement.textContent = '\n' + newJson + '\n';
+                    }
+                });
+                
+                // Serialize the XML
+                const serializer = new XMLSerializer();
+                let newXml = serializer.serializeToString(xmlDoc);
+                
+                // Add XML declaration if not present
+                if (!newXml.startsWith('<?xml')) {
+                    newXml = '<?xml version="1.0" encoding="UTF-8"?>\n' + newXml;
+                }
+                
+                // Download the file
+                const blob = new Blob([newXml], { type: 'application/xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'modified_config.xml';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus('XML file saved successfully!', 'success');
+            } catch (err) {
+                showStatus('Error saving XML: ' + err.message, 'error');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('xmlFile').value = '';
+            document.getElementById('xmlFileBtn').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('dropZone').classList.remove('drag-over');
+            document.getElementById('eformsContainer').innerHTML = '';
+            document.getElementById('saveSection').classList.add('hidden');
+            document.getElementById('statusMessage').className = 'status-message';
+            
+            originalXml = null;
+            eFormsData = [];
+            datagridComponents = [];
+            
+            sortableInstances.forEach(s => s.destroy());
+            sortableInstances = [];
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message ' + type;
+            
+            setTimeout(() => {
+                statusEl.className = 'status-message';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
